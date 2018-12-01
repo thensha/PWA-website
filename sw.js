@@ -1,19 +1,17 @@
-'use strict'
-
 const VERSION = 'v1';
 
 //安装后立刻激活并执行serviceWorker
-self.addEventListener('install', ev => {
-    ev.waitUntil(self.skipWaiting());
+self.addEventListener('install', event => {
+    event.waitUntil(self.skipWaiting());
 })
 
-self.addEventListener('activated', ev => {
-    ev.waitUntil(self.clients.claim())
+self.addEventListener('activated', event => {
+    event.waitUntil(self.clients.claim())
 })
 
 //安装前先缓存文件
-self.addEventListener('install', ev => {
-    ev.waitUntil(
+self.addEventListener('install', event => {
+    event.waitUntil(
         caches.open(VERSION)
         .then(cache => cache.addAll([
             './js/background.js',
@@ -26,7 +24,7 @@ self.addEventListener('install', ev => {
 
 
 // 缓存更新
-self.addEventListener('activate', function (event) {
+self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(function (cacheNames) {
             return Promise.all(
@@ -42,7 +40,7 @@ self.addEventListener('activate', function (event) {
 });
 
 
-self.addEventListener('fetch', function (event) {
+self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
         .then(function (response) {
@@ -72,7 +70,7 @@ self.addEventListener('fetch', function (event) {
 
                     return response;
                 }
-            ).catch(error => {
+            ).catch(() => {
                 if (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html')) {
                     return caches.match('./index.html');
                 }
