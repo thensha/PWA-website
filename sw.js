@@ -1,5 +1,4 @@
-const cacheName = 'offline-cache';
-const offlineUrl = 'offline-page.html';
+const VERSION = 'v2';
 
 //安装后立刻激活并执行serviceWorker
 self.addEventListener('install', ev => {
@@ -13,17 +12,33 @@ self.addEventListener('activated', ev => {
 //安装前先缓存文件
 self.addEventListener('install', ev => {
     ev.waitUntil(
-        caches.open(cacheName)
+        caches.open(VERSION)
         .then(cache => cache.addAll([
-            './background.js',
-            './main.js',
-            '../index.html',
-            '../offline-page.html',
-            '../img/img.jpg',
-            offlineUrl
+            './js/background.js',
+            './js/main.js',
+            './index.html',
+            './img/img.jpg'
         ]))
     );
 });
+
+
+// 缓存更新
+self.addEventListener('activate', function (event) {
+    event.waitUntil(
+        caches.keys().then(function (cacheNames) {
+            return Promise.all(
+                cacheNames.map(function (cacheName) {
+                    // 如果当前版本和缓存版本不一致
+                    if (cacheName !== VERSION) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+});
+
 
 self.addEventListener('fetch', function (event) {
 
@@ -51,7 +66,7 @@ self.addEventListener('fetch', function (event) {
                 }
             ).catch(error => {
                 if (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html')) {
-                    return caches.match(offlineUrl);
+                    return caches.match('./index.html');
                 }
             });
         })
