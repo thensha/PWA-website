@@ -1,6 +1,15 @@
 const cacheName = 'offline-cache';
 const offlineUrl = 'offline-page.html';
 
+//安装后立刻激活并执行serviceWorker
+self.addEventListener('install', ev => {
+    ev.waitUntil(self.skipWaiting());
+})
+
+self.addEventListener('activated', ev => {
+    ev.waitUntil(self.clients.claim())
+})
+
 //安装前先缓存文件
 self.addEventListener('install', ev => {
     ev.waitUntil(
