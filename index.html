@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Puzzle-404</title>
+    <link rel="manifest" href="./manifest.json">
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="./img//icon-img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#000000">
+
+    <style>
+        html{
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+        }
+        #bg{
+            background-color: #000;
+            z-index: -999;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+        }
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color:white;
+        }
+        .footer a{
+            text-decoration: none;
+            color:rgba(255, 166, 0, 0.959);
+            font-size: 25px;
+        }
+        .footer a:hover{
+            text-decoration: underline;
+        }
+        .contact{
+            font-size: 16px;
+            color: lightgreen;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景canvas -->
+    <canvas id="bg"></canvas>
+    <!-- 内容区 -->
+    <div class="wrapper">
+        <!-- 标题 -->
+        <div class="title">
+            <h2>拼图游戏</h2>
+            <p>玩法：点击图片实现上下左右移动</p>
+        </div>
+        <!-- 难度条 -->
+        <div class="slider">
+            <form>
+                <label>Easy</label>
+                <input type="range" id="level" min="3" max="5" value="4" step="1">
+                <label>Difficult</label>
+                <img id="source" src="./img/img.jpg" width="120px" height="120px">
+            </form>
+            <br>
+        </div>
+        <!-- 内容canvas -->
+        <div id="main" class="main">
+            <canvas id="canvas" width="350px" height="350px"></canvas>
+        </div>
+        <footer class="footer">
+            <p>About me:
+                <a target="_blank" href="https://blog.csdn.net/weixin_41702247">CSDN</a>、
+                <a target="_blank" href="https://github.com/thensha">GitHub</a>
+            </p>
+            <p>Contact me:
+                <span class="contact">wy_1407@outlook.com</span>
+            </p>
+        </footer>
+    </div>
+
+    <script src="./js/main.js"></script>
+    <script src="./js/background.js"></script>
+
+    <script type="text/javascript">
+        if (navigator.serviceWorker != null) {
+            navigator.serviceWorker.register('./js/sw.js')
+                .then(function (registration) {
+                    console.log('Registered events at scope: ', registration.scope);
+                })
+                .catch(function (err) {
+                    console.log('Failed register serviceWorker', err)
+                });
+        }
+    </script>
+</body>
+
+</html>
