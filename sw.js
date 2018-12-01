@@ -40,23 +40,36 @@ self.addEventListener('activate', function (event) {
 });
 
 
-// 捕获请求并返回缓存数据
 self.addEventListener('fetch', function (event) {
 
     event.respondWith(
         caches.match(event.request)
-        .catch(function () {
-            return fetch(event.request);
-        })
         .then(function (response) {
-            var responseToCache = response.clone();
-            caches.open(VERSION)
-                .then(function (cache) {
-                    cache.put(event.request, responseToCache);
-                });
-            return response.clone();
+            if (response) {
+                return response;
+            }
+            var fetchRequest = event.request.clone();
+
+            return fetch(fetchRequest).then(
+                function (response) {
+                    if (!response || response.status !== 200) {
+                        return response;
+                    }
+
+                    var responseToCache = response.clone();
+                    caches.open(cacheName)
+                        .then(function (cache) {
+                            cache.put(event.request, responseToCache);
+                        });
+
+                    return response;
+                }
+            ).catch(error => {
+                if (event.request.method === 'GET' && event.request.headers.get('accept').includes('text/html')) {
+                    return caches.match('./index.html');
+                }
+            });
         })
-        .catch(function () {
-            return caches.match('./index.html');
-        }));
+    );
+
 });
