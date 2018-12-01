@@ -23,23 +23,9 @@ self.addEventListener('install', event => {
 });
 
 
-// 缓存更新
-self.addEventListener('activate', event => {
-    event.waitUntil(
-        caches.keys().then(function (cacheNames) {
-            return Promise.all(
-                cacheNames.map(function (cacheName) {
-                    // 如果当前版本和缓存版本不一致
-                    if (cacheName !== VERSION) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
-
-
+//离线思路：
+//监听fetch事件，通过 caches 全局对象match请求，如果有缓存就返回缓存文件，没有就复制一个浏览器请求，然后向服务器fetch
+//拿到response后复制一个，一个用来更新缓存，一个用来返回给浏览器
 self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
@@ -65,9 +51,10 @@ self.addEventListener('fetch', event => {
 
                     caches.open(VERSION)
                         .then(function (cache) {
+                            //cache.put方法将一个键值对添加至缓存对象中，此处用于缓存新文件
                             cache.put(event.request, responseToCache);
                         });
-
+                    // 将正常的response返回给浏览器进行页面渲染
                     return response;
                 }
             ).catch(() => {
@@ -75,6 +62,32 @@ self.addEventListener('fetch', event => {
                     return caches.match('./index.html');
                 }
             });
+        })
+    );
+});
+
+
+// 服务工作线程的更新原则：
+// 1.浏览器会自动对比新旧sw文件，如果有区别就算一次更新
+// 2.新服务工作线程将会启动，并触发 install 事件。
+// 3.此时，旧服务工作线程仍控制着当前页面， 因此新服务工作线程将进入 waiting 状态。
+// 4.当网站上当前打开的页面关闭时， 旧服务工作线程将会被终止， 新服务工作线程将会取得控制权。
+// 5.新服务工作线程取得控制权后， 将会触发其 activate 事件。
+
+
+//当 serviceWorker 线程更新时，删除不再需要的缓存文件
+//方式：遍历服务工作线程中的所有缓存，并删除未在当前缓存列表中的文件
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(function (cacheNames) {
+            return Promise.all(
+                cacheNames.map(function (cacheName) {
+                    // 如果当前版本和缓存版本不一致
+                    if (cacheName !== VERSION) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
         })
     );
 });
